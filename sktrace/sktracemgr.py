@@ -75,7 +75,7 @@ class Inst:
         if not self.changed_regs_dict:
             return
         # 等于多于4个字符
-        char_time_threshold = 4
+        char_time_threshold = 3
         for reg in self.changed_regs_dict:
             try_str = ""
             change_val_arr = self.changed_regs_dict[reg]
@@ -89,6 +89,19 @@ class Inst:
                     try_str = ""
             if len(try_str) >= char_time_threshold:
                 self.try_strings_set.add(try_str)
+
+            from Crypto.Util.number import long_to_bytes
+            for val2 in change_val_arr:
+                try_str = ""
+                try_bytes = long_to_bytes(int(val2, 16))[::-1]
+                for i in try_bytes:
+                    if i < 0x7f and i >= 0x20:
+                        try_str += chr(i)
+                    else:
+                        try_str = ""
+                        break
+                else:
+                    self.try_strings_set.add(try_str)
 
         if self.try_strings_set:
             # print("strs\t" + str(self.try_strings_set))
